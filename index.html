@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health in the USA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="descriptions">
+        <p>Created using <a href="https://d3js.org/" target="_blank">D3 Library</a></p>
+        <p>Data Source: <a href="https://www.cdc.gov/dhdsp/maps/atlas/index.htm" target="_blank">cdc.gov</a></p>
+    </div>
+    <div class="title-container">
+        <h1 class="main-title">Health in the USA</h1>
+        <p class="subtext">Vis Data Project 1: Molly Vongsakhamphouy</p>
+      </div>      
+    <div class="container">
+        <div class="attribute-row">
+            <div class="dropdown-container">
+                <label for="attribute1" class="dropdown-label">Select Attribute 1:</label>
+                <select id="attribute1" class="dropdown"></select>
+            </div>
+            <div class="dropdown-container">
+                <label for="attribute2" class="dropdown-label">Select Attribute 2:</label>
+                <select id="attribute2" class="dropdown"></select>
+            </div>
+        </div>
+        <div class="charts-row">
+            <div class="chart1" id="chart1"></div>
+            <div class="scatterplot" id="scatterplot"></div>
+            <div class="chart2" id="chart2"></div>
+        </div>
+        <div class="maps-row">
+            <div class="map" id="map1"></div>
+            <div class="map" id="map2"></div>
+        </div>
+    </div>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

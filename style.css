@@ -1,0 +1,97 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    width: 90vw;
+}
+
+.attribute-row, .charts-row, .maps-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.attribute-row {
+    position: relative;
+  left: 60px
+
+}
+  
+.maps-row{
+    position: relative;
+    left: 60px;
+    top: 30px;
+
+}
+
+.chart2{
+    position: relative;
+    left: 60px;
+
+}
+
+.attribute-row > div, .charts-row > div, .maps-row > div {
+    flex: 1;
+}
+
+.charts-row {
+    position: relative;
+    left: 30px;
+    top:20px
+}
+
+.map, .chart {
+    margin: 5px;
+    flex-grow: 1;
+}
+
+#scatterplot {
+    margin: 5px;
+    flex-grow: 1;
+    position: relative;
+    left: 20px
+}
+.title-container {
+    text-align: center;
+  }
+  
+  .main-title {
+    margin: 0;
+    padding: 0;
+    font-size: 2em; /* Adjust size as needed */
+  }
+  
+  .subtext {
+    margin: 5px 0 0 0;
+    font-size: 1.2em; /* Adjust size as needed */
+    color: #666; /* Subtext color */
+  }
+  
+  .dropdown-container {
+    text-align: center; /* Centers the content */
+}
+
+.dropdown-label {
+    display: block; /* Makes the label a block element */
+    margin-bottom: 5px; /* Adds space between the label and the dropdown */
+}
+
+.dropdown {
+    width: 50%; /* Set the width of the dropdown */
+    margin: auto; /* Centers the dropdown */
+}
+
+.descriptions {
+    position: absolute;
+    top: 0px;
+    left: 5px;
+    margin: 0px; /* Adjust as needed for spacing from the top left corner */
+}
+
+.descriptions p {
+    margin: 0; /* Removes the default margin */
+    padding: 0; /* Ensures there's no padding adding extra space */
+    line-height: 1.2; /* Adjusts the line height for tighter text */
+}
+
+
