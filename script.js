@@ -325,6 +325,15 @@ function renderHistogram(selector, data, attribute) {
     .range([height, 0]);
 
     const minHeight = 5;
+    const histogramColor1 = "#3182bd"; // Soft blue
+    const histogramColor2 = "#31a354"
+    let fillColor;
+
+    if (selector === "#chart1") {
+        fillColor = histogramColor1;
+    } else if (selector === "#chart2") {
+        fillColor = histogramColor2;
+    }
 
     svg.selectAll("rect")
         .data(bins)
@@ -334,7 +343,7 @@ function renderHistogram(selector, data, attribute) {
             .attr("y", d => Math.min(height - 5, y(d.length))) 
             .attr("width", d => x(d.x1) - x(d.x0))
             .attr("height", d => Math.max(5, height - y(d.length))) 
-            .style("fill", "steelblue");
+            .style("fill", fillColor);
         
 
     const xAxis = d3.axisBottom(x)
@@ -356,9 +365,11 @@ function renderHistogram(selector, data, attribute) {
         .call(d3.axisLeft(y));
           
 
-    svg.append("text")
-    .attr("transform", `translate(${width / 2},${height + margin.top + 30})`)
-    .text(axisTitles[attribute] || attribute)
+        svg.append("text")
+        .attr("transform", `translate(${width / 2},${height + margin.top + 30})`)
+        .style("text-anchor", "middle")
+        .text(axisTitles[attribute] || attribute)
+    
 
     svg.append("text")
     .attr("transform", "rotate(-90)")
@@ -456,7 +467,7 @@ function renderScatterplot(selector, data, attributeX, attributeY) {
        .attr("r", 3.5)
        .attr("cx", d => xScale(d["x"]))
        .attr("cy", d => yScale(d["y"]))
-       .style("fill", "#69b3a2");
+       .style("fill", "#6baed6");
  
     const xAxis = d3.axisBottom(xScale).tickValues(tickValues[attributeX]);
     const yAxis = d3.axisLeft(yScale).tickValues(tickValues[attributeY]);             
