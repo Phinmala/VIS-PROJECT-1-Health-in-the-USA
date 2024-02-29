@@ -326,7 +326,7 @@ function renderHistogram(selector, data, attribute) {
 
     const minHeight = 5;
     const histogramColor1 = "#3182bd"; // Soft blue
-    const histogramColor2 = "#31a354"
+    const histogramColor2 = "#31a354";
     let fillColor;
 
     if (selector === "#chart1") {
