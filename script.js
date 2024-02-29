@@ -256,14 +256,20 @@ function prepareDataForChart(data, attribute) {
 }
 
 function prepareDataForChart2(data, attribute){
-
     const filteredData = data.filter(d => d[attribute] !== "-1");
     if (attribute === 'urban_rural_status') {
-        return filteredData.map(d => ({ key: d[attribute], value: urbanRuralMappingChart[d[attribute]] }));
+        return filteredData.map(d => ({
+            key: d[attribute],
+            value: urbanRuralMappingChart[d[attribute]],
+            county: d.display_name  // Map display_name to county
+        }));
     } else {
-        return filteredData.map(d => ({ key: d[attribute], value: parseFloat(d[attribute])}));
+        return filteredData.map(d => ({
+            key: d[attribute],
+            value: parseFloat(d[attribute]),
+            county: d.display_name  // Map display_name to county
+        }));
     }
-
 }
 
 function prepareBarChart(data,attribute){
@@ -274,20 +280,28 @@ function prepareBarChart(data,attribute){
             console.log("counts array: " + JSON.stringify(countsArray.slice(0, 5), null, 2));
             return countsArray;
 }
+function toTitleCase(str) {
+    return str.replace(/_/g, ' ') // Replace underscores with spaces
+              .split(' ') // Split the string into words
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
+              .join(' '); // Join the words back into a string
+}
 
 function prepareDataForScatterplot(data, attributeX, attributeY) {
-    
     console.log("PREP SCATTER DATA");
     const preparedDataX = prepareDataForChart2(data, attributeX);
-    console.log("PREP X: "+ preparedDataX);
+    console.log("PREP X: ", preparedDataX);
     const preparedDataY = prepareDataForChart2(data, attributeY);
-    console.log("PREP Y: "+ preparedDataY);
+    console.log("PREP Y: ", preparedDataY);
     const mergedData = preparedDataX.map((d, i) => ({
         x: d.value,
-        y: i < preparedDataY.length ? preparedDataY[i].value : null
+        y: i < preparedDataY.length ? preparedDataY[i].value : null,
+        county: d.county,
+        attributeNameX: toTitleCase(attributeX), // Format the attribute name
+        attributeNameY: toTitleCase(attributeY)  // Format the attribute name
     })).filter(d => d.y !== null && !isNaN(d.x) && !isNaN(d.y));
-    console.log("MERGED: "+ mergedData);
-    console.log("MERGED DATA: " + JSON.stringify(mergedData.slice(0, 5), null, 2));
+    console.log("MERGED: ", mergedData);
+    console.log("MERGED DATA: ", JSON.stringify(mergedData.slice(0, 5), null, 2));
 
     return mergedData;
 }
@@ -335,16 +349,47 @@ function renderHistogram(selector, data, attribute) {
         fillColor = histogramColor2;
     }
 
+    let tooltip = d3.select("#tooltip");
+    if (tooltip.empty()) {
+        tooltip = d3.select("body").append("div")
+            .attr("id", "tooltip")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("text-align", "center")
+            .style("width", "auto")
+            .style("height", "auto")
+            .style("padding", "8px")
+            .style("font", "12px sans-serif")
+            .style("background", "lightsteelblue")
+            .style("border", "0px")
+            .style("border-radius", "8px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+    }
+
     svg.selectAll("rect")
         .data(bins)
         .enter()
         .append("rect")
             .attr("x", d => x(d.x0) + 1)
-            .attr("y", d => Math.min(height - 5, y(d.length))) 
-            .attr("width", d => x(d.x1) - x(d.x0))
-            .attr("height", d => Math.max(5, height - y(d.length))) 
-            .style("fill", fillColor);
-        
+            .attr("y", d => y(d.length))
+            .attr("width", d => x(d.x1) - x(d.x0) - 1) // Subtract 1 to create a small gap between bars
+            .attr("height", d => height - y(d.length))
+            .style("fill", fillColor)
+            .on("mouseover", function(event, d) {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html(`# of Counties: ${d.length}<br/>Range: [${d.x0}, ${d.x1})`)
+                    .style("left", (event.pageX) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
 
     const xAxis = d3.axisBottom(x)
     .tickValues(tickValues[attribute])
@@ -401,15 +446,55 @@ function renderBarChart(selector, data) {
                 .range([height, 0]) 
                 .domain([0, d3.max(data, d => d.value)]); 
 
-    svg.selectAll(".bar")
-       .data(data)
-       .enter().append("rect")
-         .attr("class", "bar")
-         .attr("x", d => x(d.key))
-         .attr("width", x.bandwidth())
-         .attr("y", d => y(d.value))
-         .attr("height", d => height - y(d.value)) 
-         .style("fill", "steelblue");
+    let tooltip = d3.select("#tooltip");
+    if (tooltip.empty()) {
+        tooltip = d3.select("body").append("div")
+            .attr("id", "tooltip")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("text-align", "center")
+            .style("width", "auto")
+            .style("height", "auto")
+            .style("padding", "8px")
+            .style("font", "12px sans-serif")
+            .style("background", "lightsteelblue")
+            .style("border", "0px")
+            .style("border-radius", "8px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+    }
+    const histogramColor1 = "#3182bd"; // Soft blue
+    const histogramColor2 = "#31a354";
+    let fillColor;
+
+    if (selector === "#chart1") {
+        fillColor = histogramColor1;
+    } else if (selector === "#chart2") {
+        fillColor = histogramColor2;
+    }
+
+        svg.selectAll(".bar")
+        .data(data)
+        .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => x(d.key))
+            .attr("width", x.bandwidth())
+            .attr("y", d => y(d.value))
+            .attr("height", d => height - y(d.value)) 
+            .style("fill", fillColor)
+            .on("mouseover", function(event, d) {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html(`# of Counties: ${d.value}<br/>Category: ${d.key}`)
+                    .style("left", (event.pageX) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
 
 
     svg.append("g")
@@ -460,14 +545,50 @@ function renderScatterplot(selector, data, attributeX, attributeY) {
                         d3.max(tickValues[attributeY] || data.map(d => d[attributeY]))
                      ])
                      .range([height, 0]);
+    let tooltip = d3.select("#tooltip");
+    if (tooltip.empty()) {
+        tooltip = d3.select("body").append("div")
+            .attr("id", "tooltip")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("text-align", "center")
+            .style("width", "auto")
+            .style("height", "auto")
+            .style("padding", "8px")
+            .style("font", "12px sans-serif")
+            .style("background", "lightsteelblue")
+            .style("border", "0px")
+            .style("border-radius", "8px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+     
+    }
+        // Assuming 'data' is your array
+        data.slice(0, 4).forEach(element => {
+            console.log("BEFORE SCATTER DATA: "+ JSON.stringify(element, null, 2)); // Pretty-print the object
+        });
+
     svg.selectAll(".dot")
-       .data(data)
-       .enter().append("circle")
-       .attr("class", "dot")
-       .attr("r", 3.5)
-       .attr("cx", d => xScale(d["x"]))
-       .attr("cy", d => yScale(d["y"]))
-       .style("fill", "#6baed6");
+    .data(data)
+    .enter().append("circle")
+    .attr("class", "dot")
+    .attr("r", 3.5)
+    .attr("cx", d => xScale(d["x"]))
+    .attr("cy", d => yScale(d["y"]))
+    .style("fill", "#6baed6")
+    .on("mouseover", function(event, d) {
+        tooltip.transition()
+            .duration(200)
+            .style("opacity", 0.9);
+        tooltip.html(`County: ${d.county}<br/>${d.attributeNameX}: ${d["x"]}<br/>${d.attributeNameY}: ${d["y"]}`) // Access the x and y values
+            .style("left", (event.pageX + 5) + "px")
+            .style("top", (event.pageY - 28) + "px");
+    })
+    .on("mouseout", function() {
+        tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+    });
  
     const xAxis = d3.axisBottom(xScale).tickValues(tickValues[attributeX]);
     const yAxis = d3.axisLeft(yScale).tickValues(tickValues[attributeY]);             
@@ -539,7 +660,12 @@ function populateDropdown(selector, options, isStateDropdown = false) {
     });
 }
 
-
+function toTitleCase(str) {
+    return str.replace(/_/g, ' ') // Replace underscores with spaces
+              .split(' ') // Split the string into words
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
+              .join(' '); // Join the words back into a string
+}
 
 function renderChoroplethMap(containerSelector, geoData, attribute) {
     const urbanRuralColors = {
@@ -547,6 +673,12 @@ function renderChoroplethMap(containerSelector, geoData, attribute) {
         2: '#bdd7e7', // Suburban
         3: '#6baed6', // Small City
         4: '#2171b5'  // Urban
+    };
+    const urbanRuralLabels = {
+        1: 'Rural',
+        2: 'Suburban',
+        3: 'Small City',
+        4: 'Urban'
     };
 
     let colorScale;
@@ -561,7 +693,24 @@ function renderChoroplethMap(containerSelector, geoData, attribute) {
         .translate([650/2, 325/2]);
 
     const pathGenerator = d3.geoPath().projection(projection);
-
+    let tooltip = d3.select("#tooltip");
+    if (tooltip.empty()) {
+        tooltip = d3.select("body").append("div")
+            .attr("id", "tooltip")
+            .style("position", "absolute")
+            .style("z-index", "10")
+            .style("text-align", "center")
+            .style("width", "auto")
+            .style("height", "auto")
+            .style("padding", "8px")
+            .style("font", "12px sans-serif")
+            .style("background", "lightsteelblue")
+            .style("border", "0px")
+            .style("border-radius", "8px")
+            .style("pointer-events", "none")
+            .style("opacity", 0);
+     
+    }
     const svg = d3.select(containerSelector)
         .append("svg")
         .attr("width", 750)
@@ -573,7 +722,23 @@ function renderChoroplethMap(containerSelector, geoData, attribute) {
         .append("path")
         .attr("class", "county")
         .attr("d", pathGenerator)
-        .attr('fill', d => attribute === 'urban_rural_status' ? urbanRuralColors[d.properties[attribute]] : colorScale(d.properties[attribute]));
+        .attr('fill', d => attribute === 'urban_rural_status' ? urbanRuralColors[d.properties[attribute]] : colorScale(d.properties[attribute]))
+        .on("mouseover", function(event, d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 0.9);
+            const attributeValue = attribute === 'urban_rural_status' ? urbanRuralLabels[d.properties[attribute]] : d.properties[attribute];
+            const countyName = d.properties.display_name; // Make sure this is the correct property name for the county name
+            const attributeName = axisTitles[attribute] || attribute; // Use axisTitles to get the full title
+            tooltip.html(`${countyName}<br/>${attributeName}: ${attributeValue}`)
+                .style("left", (event.pageX + 5) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function() {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 
     const svgWidth = 650, svgHeight = 325;
     const legendWidth = 200, legendHeight = 40;
@@ -636,6 +801,7 @@ function renderChoroplethMap(containerSelector, geoData, attribute) {
             .attr("class", "legend axis")
             .attr("transform", `translate(${legendX}, ${legendY + 20})`)
             .call(customLegendAxis);
+
     }else if (attribute === 'number_of_primary_care_physicians') {
         const defs = svg.append("defs");
         const linearGradient = defs.append("linearGradient")
