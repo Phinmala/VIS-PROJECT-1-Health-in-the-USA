@@ -261,13 +261,13 @@ function prepareDataForChart2(data, attribute){
         return filteredData.map(d => ({
             key: d[attribute],
             value: urbanRuralMappingChart[d[attribute]],
-            county: d.display_name  // Map display_name to county
+            county: d.display_name 
         }));
     } else {
         return filteredData.map(d => ({
             key: d[attribute],
             value: parseFloat(d[attribute]),
-            county: d.display_name  // Map display_name to county
+            county: d.display_name  
         }));
     }
 }
@@ -281,10 +281,10 @@ function prepareBarChart(data,attribute){
             return countsArray;
 }
 function toTitleCase(str) {
-    return str.replace(/_/g, ' ') // Replace underscores with spaces
-              .split(' ') // Split the string into words
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
-              .join(' '); // Join the words back into a string
+    return str.replace(/_/g, ' ') 
+              .split(' ') 
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) 
+              .join(' '); 
 }
 
 function prepareDataForScatterplot(data, attributeX, attributeY) {
@@ -297,8 +297,8 @@ function prepareDataForScatterplot(data, attributeX, attributeY) {
         x: d.value,
         y: i < preparedDataY.length ? preparedDataY[i].value : null,
         county: d.county,
-        attributeNameX: toTitleCase(attributeX), // Format the attribute name
-        attributeNameY: toTitleCase(attributeY)  // Format the attribute name
+        attributeNameX: toTitleCase(attributeX), 
+        attributeNameY: toTitleCase(attributeY) 
     })).filter(d => d.y !== null && !isNaN(d.x) && !isNaN(d.y));
     console.log("MERGED: ", mergedData);
     console.log("MERGED DATA: ", JSON.stringify(mergedData.slice(0, 5), null, 2));
@@ -339,7 +339,7 @@ function renderHistogram(selector, data, attribute) {
     .range([height, 0]);
 
     const minHeight = 5;
-    const histogramColor1 = "#3182bd"; // Soft blue
+    const histogramColor1 = "#3182bd"; 
     const histogramColor2 = "#31a354";
     let fillColor;
 
@@ -373,7 +373,7 @@ function renderHistogram(selector, data, attribute) {
         .append("rect")
             .attr("x", d => x(d.x0) + 1)
             .attr("y", d => y(d.length))
-            .attr("width", d => x(d.x1) - x(d.x0) - 1) // Subtract 1 to create a small gap between bars
+            .attr("width", d => x(d.x1) - x(d.x0) - 1) 
             .attr("height", d => height - y(d.length))
             .style("fill", fillColor)
             .on("mouseover", function(event, d) {
@@ -463,7 +463,7 @@ function renderBarChart(selector, data) {
             .style("pointer-events", "none")
             .style("opacity", 0);
     }
-    const histogramColor1 = "#3182bd"; // Soft blue
+    const histogramColor1 = "#3182bd";
     const histogramColor2 = "#31a354";
     let fillColor;
 
@@ -563,9 +563,9 @@ function renderScatterplot(selector, data, attributeX, attributeY) {
             .style("opacity", 0);
      
     }
-        // Assuming 'data' is your array
+      
         data.slice(0, 4).forEach(element => {
-            console.log("BEFORE SCATTER DATA: "+ JSON.stringify(element, null, 2)); // Pretty-print the object
+            console.log("BEFORE SCATTER DATA: "+ JSON.stringify(element, null, 2)); 
         });
 
     svg.selectAll(".dot")
@@ -580,7 +580,7 @@ function renderScatterplot(selector, data, attributeX, attributeY) {
         tooltip.transition()
             .duration(200)
             .style("opacity", 0.9);
-        tooltip.html(`County: ${d.county}<br/>${d.attributeNameX}: ${d["x"]}<br/>${d.attributeNameY}: ${d["y"]}`) // Access the x and y values
+        tooltip.html(`County: ${d.county}<br/>${d.attributeNameX}: ${d["x"]}<br/>${d.attributeNameY}: ${d["y"]}`) 
             .style("left", (event.pageX + 5) + "px")
             .style("top", (event.pageY - 28) + "px");
     })
@@ -661,10 +661,10 @@ function populateDropdown(selector, options, isStateDropdown = false) {
 }
 
 function toTitleCase(str) {
-    return str.replace(/_/g, ' ') // Replace underscores with spaces
-              .split(' ') // Split the string into words
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
-              .join(' '); // Join the words back into a string
+    return str.replace(/_/g, ' ')
+              .split(' ') 
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) 
+              .join(' '); 
 }
 
 function renderChoroplethMap(containerSelector, geoData, attribute) {
@@ -728,8 +728,8 @@ function renderChoroplethMap(containerSelector, geoData, attribute) {
                 .duration(200)
                 .style("opacity", 0.9);
             const attributeValue = attribute === 'urban_rural_status' ? urbanRuralLabels[d.properties[attribute]] : d.properties[attribute];
-            const countyName = d.properties.display_name; // Make sure this is the correct property name for the county name
-            const attributeName = axisTitles[attribute] || attribute; // Use axisTitles to get the full title
+            const countyName = d.properties.display_name;
+            const attributeName = axisTitles[attribute] || attribute; 
             tooltip.html(`${countyName}<br/>${attributeName}: ${attributeValue}`)
                 .style("left", (event.pageX + 5) + "px")
                 .style("top", (event.pageY - 28) + "px");
